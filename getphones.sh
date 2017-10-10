@@ -17,7 +17,7 @@ expect "admin:" { send "quit\r" }
 interact
 EOF
 
-#fix phones file (place secondary lines (300, etc) at the end of the file and sort columns):
+#fix phones file (place secondary lines (300, etc in my case) at the end of the file and sort columns):
 awk '{ t = $1; $1 = $3; $3 = t; print; }' $scriptpath/phones.log >  $scriptpath/phones.in
 <  $scriptpath/phones.in tee >(grep -E ^'300|^301|^302|^303|^290|^299|^313' | sort > $scriptpath/phones.last) | grep -v -E ^'300|^301|^302|^303|^290|^299|^313' | sort > $scriptpath/phones.first
 cat $scriptpath/phones.first $scriptpath/phones.last > $scriptpath/phones.sorted 
@@ -36,7 +36,7 @@ while read -r line ; do
         touch /etc/asterisk/sccp_hardware.conf
         SEPX="$(echo $line | awk '{print $3}' )"
         extX="$(echo $line | awk '{print $1}' )"
-#Lines you DON'T want to be default (Primary)        
+#Lines you DON'T want to be default (Primary):     
         if [[ "$extX" != +(469|321|333|301|302|303|290|299|313|270) ]]; then
                 advextX="$(echo $extX,default )"
         else
