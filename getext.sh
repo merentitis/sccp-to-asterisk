@@ -59,4 +59,5 @@ dnd = reject
 parkinglot = myparkspace
 EOT
 
+#1XXX*,447,448 are some example extensions you may want to exlude.
 done <<<"$(cat $scriptpath/extensions.log | grep -v '^[1]' | grep '^[0-9]' |  grep -v -E '448|447' | uniq |awk '!seen[$1]++' | sort )"
