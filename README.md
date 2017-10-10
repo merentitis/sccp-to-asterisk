@@ -1,6 +1,6 @@
 # sccp-to-asterisk
 
-## prerequisites:
+prerequisites:
 
 -Cisco Call Manager 6.x (Atl least this is the version I have)
  
