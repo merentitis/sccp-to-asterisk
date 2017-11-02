@@ -8,7 +8,7 @@ prerequisites:
 
 -expect
 
--TFTP server - In case you need ONLY SRST, TFTP is not needed 
+-TFTP server - In case you need ONLY SRST, TFTP is not needed. You will need TFTP if you want to use asterisk as Primary PBX instead of Call Manager.
 
 -You have to be familiar with asterisk contexts, I used a new context called "srst"
 
@@ -31,3 +31,5 @@ Asterisk ip should be configured as SRST in Call Manager.
 After each change you have to restart the sccp module. I use a cron job once a day:
 
 50 0 * * * /usr/local/ccmscripts/getphones.sh && /usr/local/ccmscripts/getext.sh && sleep 20 && /usr/sbin/asterisk -rx 'sccp reload' >/dev/null 2>&1
+
+Also edit SEP.MAC.default file and put your asterisk ip in processNodeName. Then place the file in your TFTP directory.
