@@ -1,15 +1,22 @@
 #!/bin/bash
 
+### Configuration ###
 scriptpath=/usr/local/ccmscripts
 EXPECT=/usr/bin/expect
+#Set lines you don't want to include in SRST
+exclusions=("447" "448")
+cucm=ccm.domain.com
+username=administrator
+password=pass
+#####################
+
 rm -rf $scriptpath/extensions.log
 
 #get extensions list from Cisco Call Manager via expect script
-
 $EXPECT << EOF
 set timeout 10
-spawn /usr/bin/ssh -oStrictHostKeyChecking=no administrator@ccm
-expect "password*" { send "pass\r" }
+spawn /usr/bin/ssh -oStrictHostKeyChecking=no $username@$cucm
+expect "password*" { send "$password\r" }
 log_file $scriptpath/extensions.log;# Logging it into the file 'extensions.log'
 expect "admin*" { send "run sql select numplan.DnOrPattern as extension, DeviceNumPlanMap.E164Mask as mask, numplan.alertingname as alerting_name, devicenumplanmap.display from numplan, devicenumplanmap, device where DeviceNumPlanMap.fknumplan = numplan.pkid and DeviceNumPlanMap.fkdevice = device.pkid and numplan.tkPatternUsage = 2 order by numplan.DnOrPattern\r" }
 expect sleep 5
@@ -18,14 +25,21 @@ interact
 EOF
 
 
-#Create sccp_extensions.conf included in sccp.conf
+#First Backup, then create sccp_extensions.conf included in sccp.conf
+cp -r  /etc/asterisk/sccp_extensions.conf /etc/asterisk/sccp_extensions.conf.backup
 rm -rf  /etc/asterisk/sccp_extensions.conf
+pat=$(echo ${exclusions[@]}|tr " " "|")
+#check exclusions
 while read -r line ; do
-        touch /etc/asterisk/sccp_extensions.conf
+        if ! [[ "$(echo "${line}" | awk '{print $1}' )" =~ ($pat) ]]; then
         extX="$(echo "${line}" | awk '{print $1}' )"
-#       cid_numX="$(echo "${line}" | awk '{print $1}' )"
-        cid_numX="$(echo "${line}" | awk '{print $2}' )"
+        cid_numX="$(echo "${line}" | awk '{print $1}' )"
+        #cid_numX="$(echo "${line}" | awk '{print $2}' )"
         cid_nameX="$(echo "${line}" | awk '{print $3}' )"
+        else
+                printf "\nexcluding extension...\n"
+                echo ${line}
+        fi
         cat <<EOT >> /etc/asterisk/sccp_extensions.conf
 
 [${extX}]
@@ -59,5 +73,4 @@ dnd = reject
 parkinglot = myparkspace
 EOT
 
-#1XXX*,447,448 are some example extensions you may want to exlude.
-done <<<"$(cat $scriptpath/extensions.log | grep -v '^[1]' | grep '^[0-9]' |  grep -v -E '448|447' | uniq |awk '!seen[$1]++' | sort )"
+done <<<"$(cat $scriptpath/extensions.log | grep '^[0-9]'  | uniq | awk '!seen[$1]++' | sort )"
