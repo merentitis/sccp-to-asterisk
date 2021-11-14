@@ -26,6 +26,7 @@ set timeout 10
 spawn /usr/bin/ssh -oStrictHostKeyChecking=no $username@$cucm
 expect sleep 3
 expect "password*" { send "$password\r" }
+expect sleep 5
 log_file  $scriptpath/phones.log;# Logging it into the file 'phones.log'
 expect "admin*" { send "run sql select d.name, d.description, n.dnorpattern as DN from device as d, numplan as n, devicenumplanmap as dnpm where dnpm.fkdevice = d.pkid and dnpm.fknumplan = n.pkid and d.tkclass = 1\r" }
 expect sleep 5
