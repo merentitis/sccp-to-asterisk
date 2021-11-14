@@ -17,6 +17,7 @@ $EXPECT << EOF
 set timeout 10
 spawn /usr/bin/ssh -oStrictHostKeyChecking=no $username@$cucm
 expect "password*" { send "$password\r" }
+expect sleep 5
 log_file $scriptpath/extensions.log;# Logging it into the file 'extensions.log'
 expect "admin*" { send "run sql select numplan.DnOrPattern as extension, DeviceNumPlanMap.E164Mask as mask, numplan.alertingname as alerting_name, devicenumplanmap.display from numplan, devicenumplanmap, device where DeviceNumPlanMap.fknumplan = numplan.pkid and DeviceNumPlanMap.fkdevice = device.pkid and numplan.tkPatternUsage = 2 order by numplan.DnOrPattern\r" }
 expect sleep 5
